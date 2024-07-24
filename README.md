@@ -23,7 +23,7 @@ ortho_projects/
     ├── scripts/
     ├── docs/
     └── results/
-```plaintext
+```
 
 ### Prerequisites
 - Python 3.8 or higher
