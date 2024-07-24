@@ -7,19 +7,22 @@ This repository contains two main projects related to orthopedic research:
 
 ## Project Structure
 
+```plaintext
 ortho_projects/
+├── requirements.txt
+├── rendering_tools/
 ├── soccer_acl/
-│ ├── data/
-│ ├── notebooks/
-│ ├── scripts/
-│ ├── docs/
-│ └── results/
+│   ├── data/
+│   ├── notebooks/
+│   ├── scripts/
+│   ├── docs/
+│   └── results/
 └── scoliosis/
-├── data/
-├── notebooks/
-├── scripts/
-├── docs/
-└── results/
+    ├── data/
+    ├── notebooks/
+    ├── scripts/
+    ├── docs/
+    └── results/
 
 ### Prerequisites
 - Python 3.8 or higher
