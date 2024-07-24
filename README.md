@@ -5,7 +5,7 @@ This repository contains two main projects related to orthopedic research:
 - `soccer_acl`: Analysis of soccer ACL injuries.
 - `scoliosis`: Analysis of scoliosis data.
 
-## Project Structure ## Getting Started
+## Project Structure
 
 ortho_projects/
 ├── soccer_acl/
@@ -49,7 +49,7 @@ ortho_projects/
     pip install -r requirements.txt
     ```
 
-### Usage ###
+### Usage
 
 ### Word Analyzer Tool ###
 
