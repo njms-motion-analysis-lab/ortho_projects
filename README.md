@@ -77,7 +77,7 @@ Run the script
 python3 text_to_tone.py <function> --text <path_to_text_file>
 ```
 
-If no text file is provided, the script will use the default text file located at /Users/stephenmacneille/Desktop/20240616_Trial1.docx.
+If no text file is provided, the script will use the default text file.
 
 
 Example Commands
