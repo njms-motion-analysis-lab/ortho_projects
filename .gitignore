@@ -1,4 +1,4 @@
-# Ignore history directory
+# History
 .history/
 
 # Byte-compiled / optimized / DLL files
@@ -6,8 +6,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# C extensions
-*.so
+# Virtual environment
+myenv/
+venv/
 
 # Distribution / packaging
 .Python
@@ -49,8 +50,6 @@ coverage.xml
 *.cover
 *.py,cover
 .hypothesis/
-.pytest_cache/
-cover/
 
 # Translations
 *.mo
@@ -60,7 +59,6 @@ cover/
 *.log
 local_settings.py
 db.sqlite3
-db.sqlite3-journal
 
 # Flask stuff:
 instance/
@@ -72,8 +70,8 @@ instance/
 # Sphinx documentation
 docs/_build/
 
-# Jupyter Notebook
-.ipynb_checkpoints
+# PyBuilder
+target/
 
 # IPython
 profile_default/
@@ -82,36 +80,37 @@ ipython_config.py
 # pyenv
 .python-version
 
-# Celery stuff
+# celery beat schedule file
 celerybeat-schedule
 celerybeat.pid
 
-# SageMath parsed files
-*.sage.py
-
 # dotenv
 .env
+.env.*
+
+# virtualenv
 .venv
 env/
-venv/
 ENV/
-env.bak/
 venv.bak/
+venv/
 
 # Spyder project settings
 .spyderproject
-.spyproject
 
 # Rope project settings
 .ropeproject
 
-# mkdocs documentation
-/site
+# MacOS system files
+.DS_Store
 
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
 
-# Pyre type checker
-.pyre/
+# Ignore data files
+*.json
+*.csv
+
+# Ignore text editor swap files
+*.swp
+*.swo
