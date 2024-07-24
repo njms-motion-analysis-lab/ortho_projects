@@ -37,18 +37,13 @@ ortho_projects/
     cd ortho_projects
     ```
 
-2. **Navigate to the `soccer_acl` Project**:
-    ```bash
-    cd soccer_acl
-    ```
-
-3. **Create and Activate a Virtual Environment**:
+2. **Create and Activate a Virtual Environment**:
     ```bash
     python -m venv venv
     source venv/bin/activate  # On Windows use `venv\Scripts\activate`
     ```
 
-4. **Install Dependencies**:
+3. **Install Dependencies**:
     ```bash
     pip install -r requirements.txt
     ```
