@@ -1,4 +1,5 @@
 import argparse
+import os
 import nltk
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
@@ -21,7 +22,7 @@ nltk.download('maxent_ne_chunker')
 nltk.download('words')
 
 # Default text if no input is provided
-DEFAULT_TEXT = "../data/docs/20240616_Trial1.docx"
+DEFAULT_TEXT = "docs/20240616_Trial1.docx"
 
 # Custom stop words
 CUSTOM_STOP_WORDS = {
@@ -41,7 +42,12 @@ def read_default_text():
         str: The full text from the DOCX file or an empty string if an error occurs.
     """
     try:
+        print(f"Attempting to read default text from: {DEFAULT_TEXT}")
+
+        if not os.path.exists(DEFAULT_TEXT):
+            raise FileNotFoundError(f"Default text file not found: {DEFAULT_TEXT}")
         doc = Document(DEFAULT_TEXT)
+        print(f"Successfully read the document: {DEFAULT_TEXT}")
         full_text = []
         for paragraph in doc.paragraphs:
             full_text.append(paragraph.text)
