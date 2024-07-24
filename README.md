@@ -33,7 +33,7 @@ ortho_projects/
 
 1. **Clone the Repository**:
     ```bash
-    git clone https://github.com/your-repo/ortho_projects.git
+    git clone [https://github.com/your-repo/ortho_projects.git](https://github.com/njms-motion-analysis-lab/ortho_projects.git)
     cd ortho_projects
     ```
 
