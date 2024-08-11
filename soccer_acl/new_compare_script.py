@@ -67,149 +67,6 @@ class PlayerStats:
         return cls(aggregate, std_dev, len(non_empty_stats_keys))
 
 
-def calculate_changes_and_normalize(pre_stats, post_stats, control_pre_stats, control_post_stats):
-    changes = {}
-    
-    for col in pre_stats.columns:
-        if col in post_stats.columns and col in control_pre_stats.columns and col in control_post_stats.columns:
-            injured_change = post_stats[col] - pre_stats[col]
-            control_change = control_post_stats[col] - control_pre_stats[col]
-
-            # Skip calculations if there is not enough variance or data
-            if control_pre_stats[col].std() == 0 or len(post_stats[col].dropna()) < 1 or len(pre_stats[col].dropna()) < 1:
-                continue
-
-            # Normalize the changes (z-score normalization)
-            norm_change = (injured_change.mean() - control_change.mean()) / control_pre_stats[col].std()
-
-            # Perform t-test
-            t_stat, p_value = ttest_rel(post_stats[col].dropna(), pre_stats[col].dropna())
-
-            # changes[col] = {'change': norm_change, 'p_value': p_value}
-        else:
-            print(f"Column '{col}' is missing in one of the DataFrames.")
-    
-    changes_df = pd.DataFrame(changes).T
-
-    # Check if 'p_value' exists before attempting to drop rows
-    if 'p_value' in changes_df.columns:
-        changes_df = changes_df.dropna(subset=['p_value'])  # Drop rows where p_value is None
-    else:
-        print("No valid p-values were computed. Skipping further analysis.")
-        return pd.DataFrame()  # Return an empty DataFrame if no valid p-values
-
-    return changes_df
-
-
-def plot_statistical_changes(changes_df):
-    if changes_df.empty:
-        print("The changes DataFrame is empty. Skipping plotting.")
-        return
-
-    # Proceed with the plot if the DataFrame is not empty
-    changes_df['significant'] = changes_df['p_value'] < 0.05
-    changes_df = changes_df.sort_values(by='p_value')
-
-    plt.figure(figsize=(12, 8))
-    sns.barplot(
-        x='change', 
-        y=changes_df.index, 
-        data=changes_df, 
-        hue='significant', 
-        dodge=False, 
-        palette='coolwarm', 
-        edgecolor=".2"
-    )
-
-    for i, (delta, p) in enumerate(zip(changes_df['change'], changes_df['p_value'])):
-        plt.text(delta, i, f"p = {p:.3f}\nΔ = {delta:.2f}", ha='center', va='center', fontsize=10, color="black")
-    
-    plt.title('Statistical Changes Pre and Post Injury by P-Value')
-    plt.xlabel('Mean Normalized Change')
-    plt.ylabel('Statistic')
-    plt.legend(title='Significant')
-    plt.tight_layout()
-    plt.show()
-
-def aggregate_player_stats(player, season_type, compare_player=None):
-    """
-    Aggregates stats for a given player based on season_type ('pre' or 'post').
-    If compare_player is provided, we try to match control seasons based on the compare_player's career progression.
-    """
-    if compare_player:
-        # Determine the year of the injury relative to the compare_player's career
-        injury_season_index = len(compare_player.pre_injury_seasons())
-
-        if season_type == 'pre':
-            control_season_index = injury_season_index - 1  # Pre-injury: 1 year before the injury year
-        elif season_type == 'post':
-            control_season_index = injury_season_index + 1  # Post-injury: 1 year after the injury year
-        else:
-            raise ValueError("Invalid season_type. Must be 'pre' or 'post'.")
-
-        # Filter the control player's seasons based on the calculated control_season_index
-        seasons = [
-            season for idx, season in enumerate(sorted(player.seasons, key=lambda s: s.season.year))
-            if idx == control_season_index
-        ]
-    else:
-        # Normal case: aggregate all seasons of the specified type
-        seasons = getattr(player, f'{season_type}_injury_seasons')()
-
-    if not seasons:
-        return {}
-
-    aggregated_stats = aggregate_stats(seasons)
-    return aggregated_stats
-
-
-def find_control_player(injured_player, session):
-    """
-    Find a control player based on the closest match in the pre-injury season stats.
-    Exclude players who have had injuries.
-    """
-    # Fetch the pre-injury season
-    try:
-        pre_injury_season = injured_player.pre_injury_seasons()[-1]  # Assuming last pre-injury season is the most relevant
-    except IndexError:
-        # print(f"No pre-injury seasons found for {injured_player.name}")
-        return None
-
-    # Find potential control matches
-    control_matches = pre_injury_season.find_control_matches()
-    closest_match = None
-    
-    for control_match in control_matches:
-        control_player = control_match.player
-        
-        # Check if the control player has had an injury
-        has_injury = session.query(PlayerInjury).filter(PlayerInjury.player_id == control_player.id).first()
-        
-        if not has_injury:
-            closest_match = control_player
-            break  # Assuming we take the first valid match
-
-    if closest_match:
-        print(f"Control player found: {closest_match.name} for injured player {injured_player.name}")
-    else:
-        print(f"No suitable control player found for {injured_player.name}")
-    
-    return closest_match
-
-def find_control_matches(player_season):
-    control_matches = player_season.find_control_matches()
-    
-    # Exclude control players who have injuries
-    control_matches = [match for match in control_matches if not match.player.injuries]
-    
-    # Ensure control player has at least one additional player season after the matched one
-    control_matches = [
-        match for match in control_matches 
-        if any(season.year > match.season.year for season in match.player.seasons)
-    ]
-    
-    return control_matches
-
 def main():
     session = Session()
 
@@ -344,16 +201,11 @@ def main():
 
         return aggregate, std_devs, len(non_empty_stats_keys)
 
-    # Example usage:
-    # Assuming you have the data from your earlier aggregation
-    # aggregated_injured_pre, aggregated_injured_post, aggregated_control_pre, aggregated_control_post
-    # Convert dictionaries to DataFrames
 
     aggregated_injured_pre, std_dev_injured_pre, injured_pre_counts = aggregate_stats(injured_pre_stats)
     aggregated_injured_post, std_dev_injured_post, injured_post_counts = aggregate_stats(injured_post_stats)
     aggregated_control_pre, std_dev_control_pre, control_pre_counts = aggregate_stats(control_pre_stats)
     aggregated_control_post, std_dev_control_post, control_post_counts = aggregate_stats(control_post_stats)
-
 
     # Create PlayerStats objects directly
     injured_pre_stats = PlayerStats(aggregated_injured_pre, std_dev_injured_pre, injured_pre_counts)
@@ -361,7 +213,7 @@ def main():
     control_pre_stats = PlayerStats(aggregated_control_pre, std_dev_control_pre, control_pre_counts)
     control_post_stats = PlayerStats(aggregated_control_post, std_dev_control_post, control_post_counts)
 
-
+    # Step 8: Analyze diff in diff.
     def analyze_diff_in_diff(injured_pre_stats, injured_post_stats, control_pre_stats, control_post_stats, alt_diff=None):
         norm_diff_diffs = {}
         raw_diff_diffs = {}
@@ -416,6 +268,7 @@ def main():
         
         return norm_diff_diffs, raw_diff_diffs, t_statistics, p_values
 
+    # Step 9: Plot diffs
     def plot_diff_in_diff(results, p_vals, t_stats, normalized=True, significance_level=0.05, alt_diff=None):
         # Define a dictionary for human-readable labels and filter out non-performance stats
         stat_labels = {
@@ -507,19 +360,19 @@ def main():
         plt.show()
 
     # # Assuming you have your stats objects defined
-    # alt_diff = None
-    # results, raw_results, t_stats, p_vals = analyze_diff_in_diff(injured_pre_stats, injured_post_stats, control_pre_stats, control_post_stats, alt_diff=alt_diff)
+    alt_diff = None
+    results, raw_results, t_stats, p_vals = analyze_diff_in_diff(injured_pre_stats, injured_post_stats, control_pre_stats, control_post_stats, alt_diff=alt_diff)
 
-    # # Plot normalized differences
-    # plot_diff_in_diff(results, p_vals, t_stats, normalized=True, alt_diff=alt_diff)
-    # plot_diff_in_diff(raw_results, p_vals, t_stats, normalized=False, alt_diff=alt_diff)
+    # Plot normalized differences
+    plot_diff_in_diff(results, p_vals, t_stats, normalized=True, alt_diff=alt_diff)
+    plot_diff_in_diff(raw_results, p_vals, t_stats, normalized=False, alt_diff=alt_diff)
 
-    # alt_diff = 'injured'
-    # results, raw_results, t_stats, p_vals = analyze_diff_in_diff(injured_pre_stats, injured_post_stats, control_pre_stats, control_post_stats, alt_diff=alt_diff)
+    alt_diff = 'injured'
+    results, raw_results, t_stats, p_vals = analyze_diff_in_diff(injured_pre_stats, injured_post_stats, control_pre_stats, control_post_stats, alt_diff=alt_diff)
 
-    # # Plot normalized differences
-    # plot_diff_in_diff(results, p_vals, t_stats, normalized=True, alt_diff=alt_diff)
-    # plot_diff_in_diff(raw_results, p_vals, t_stats, normalized=False, alt_diff=alt_diff)
+    # Plot normalized differences
+    plot_diff_in_diff(results, p_vals, t_stats, normalized=True, alt_diff=alt_diff)
+    plot_diff_in_diff(raw_results, p_vals, t_stats, normalized=False, alt_diff=alt_diff)
 
     alt_diff = 'control'
     results, raw_results, t_stats, p_vals = analyze_diff_in_diff(injured_pre_stats, injured_post_stats, control_pre_stats, control_post_stats, alt_diff=alt_diff)
