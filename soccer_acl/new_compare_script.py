@@ -382,11 +382,5 @@ def main():
     plot_diff_in_diff(raw_results, p_vals, t_stats, normalized=False, alt_diff=alt_diff)
 
 
-    injured_pre_df = pd.DataFrame(aggregated_injured_pre, index=[0])
-    injured_post_df = pd.DataFrame(aggregated_injured_post, index=[0])
-    control_pre_df = pd.DataFrame(aggregated_control_pre, index=[0])
-    control_post_df = pd.DataFrame(aggregated_control_post, index=[0])
-
-
 if __name__ == "__main__":
     main()
