@@ -22,7 +22,7 @@ nltk.download('maxent_ne_chunker')
 nltk.download('words')
 
 # Default text if no input is provided
-DEFAULT_TEXT = "docs/20240616_Trial1.docx"
+DEFAULT_TEXT = "scoliosis/scripts/docs/20240616_Trial1.docx"
 
 # Custom stop words
 CUSTOM_STOP_WORDS = {
@@ -46,7 +46,10 @@ def read_default_text():
 
         if not os.path.exists(DEFAULT_TEXT):
             raise FileNotFoundError(f"Default text file not found: {DEFAULT_TEXT}")
+
         doc = Document(DEFAULT_TEXT)
+        print(doc)
+        
         print(f"Successfully read the document: {DEFAULT_TEXT}")
         full_text = []
         for paragraph in doc.paragraphs:
@@ -189,7 +192,9 @@ def sentiment_analysis(text):
 
     # Visualization
     plt.figure(figsize=(10, 5))
-    plt.bar(['Polarity', 'Subjectivity'], [sentiment.polarity, sentiment.subjectivity], color=['blue', 'orange'])
+    plt.bar(
+        ['Polarity', 'Subjectivity'], [sentiment.polarity, sentiment.subjectivity], color=['blue', 'orange']
+    )
     plt.ylim([-1, 1])
     plt.title('Sentiment Analysis')
     plt.show()
@@ -272,7 +277,6 @@ def process_bert(text):
     """
     # Assuming text is a single string, split it into sentences or smaller chunks for analysis
     sentences = sent_tokenize(text)
-    
     # Perform sentiment analysis
     sentiment_scores = bert_sentiment_analysis(sentences)
 
